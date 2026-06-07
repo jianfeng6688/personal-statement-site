@@ -83,4 +83,6 @@ https://你的網站網址/#admin
 
 進入管理模式後，頁面頂部會出現「編輯」按鈕。修改內容後會自動寫回 Supabase 的 `public.site_content`。
 
-目前這是簡單管理入口，不是真正登入系統。因為目前 RLS policy 允許 anon key 寫入，正式公開後建議改成 Supabase Auth 管理員登入，或關閉 anon 寫入、只在 Supabase 後台修改內容。
+現在管理入口已接 Supabase Auth。未登入時進入 `#admin` 會顯示登入頁；登入後才會出現「編輯」按鈕。
+
+正式公開前，請在 Supabase SQL Editor 執行 `supabase-auth-rls.sql`，並把 SQL 裡的 `YOUR_ADMIN_EMAIL@example.com` 換成你的管理員登入 Email。這會移除 anon 更新權限，只允許管理員白名單更新網站內容。

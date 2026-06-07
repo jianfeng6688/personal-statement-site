@@ -51,8 +51,12 @@ const seedState = {
 let state = loadLocalState();
 let activeCategory = "全部";
 let saveTimer;
+let currentSession = null;
 
 const siteConfig = window.SITE_CONFIG || {};
+const supabaseClient = window.supabase && isRemoteConfigured()
+  ? window.supabase.createClient(siteConfig.supabaseUrl, siteConfig.supabaseAnonKey)
+  : null;
 
 const els = {
   brandName: document.querySelector("#brandName"),
@@ -67,6 +71,12 @@ const els = {
   adminEntry: document.querySelector("#adminEntry"),
   adminBanner: document.querySelector("#adminBanner"),
   exitAdmin: document.querySelector("#exitAdmin"),
+  loginPanel: document.querySelector("#loginPanel"),
+  loginForm: document.querySelector("#loginForm"),
+  loginEmail: document.querySelector("#loginEmail"),
+  loginPassword: document.querySelector("#loginPassword"),
+  loginStatus: document.querySelector("#loginStatus"),
+  logoutButton: document.querySelector("#logoutButton"),
   themeToggle: document.querySelector("#themeToggle"),
   searchInput: document.querySelector("#searchInput"),
   categoryFilters: document.querySelector("#categoryFilters"),
@@ -123,10 +133,11 @@ function isRemoteConfigured() {
   return Boolean(siteConfig.supabaseUrl && siteConfig.supabaseAnonKey);
 }
 
-function remoteHeaders() {
+function remoteHeaders({ authenticated = false } = {}) {
+  const token = authenticated ? currentSession?.access_token : siteConfig.supabaseAnonKey;
   return {
     apikey: siteConfig.supabaseAnonKey,
-    Authorization: `Bearer ${siteConfig.supabaseAnonKey}`,
+    Authorization: `Bearer ${token}`,
     "Content-Type": "application/json"
   };
 }
@@ -148,8 +159,7 @@ async function loadRemoteState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       setStatus(`已連線資料庫，最後同步 ${formatDateTime(rows[0].updated_at)}`);
     } else {
-      await saveRemoteState();
-      setStatus("已建立線上資料內容。");
+      setStatus("資料庫目前沒有內容，登入管理員後可建立。");
     }
   } catch (error) {
     setStatus(`資料庫讀取失敗，暫用本機內容：${error.message}`);
@@ -158,12 +168,15 @@ async function loadRemoteState() {
 
 async function saveRemoteState() {
   if (!isRemoteConfigured()) return;
+  if (!currentSession?.access_token) {
+    throw new Error("請先登入管理員帳號");
+  }
 
   const endpoint = `${siteConfig.supabaseUrl}/rest/v1/site_content?on_conflict=id`;
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
-      ...remoteHeaders(),
+      ...remoteHeaders({ authenticated: true }),
       Prefer: "resolution=merge-duplicates"
     },
     body: JSON.stringify({
@@ -201,10 +214,34 @@ function isAdminMode() {
 
 function renderAdminMode() {
   const active = isAdminMode();
-  document.querySelectorAll(".admin-only").forEach((element) => {
-    element.hidden = !active;
-  });
+  const signedIn = Boolean(currentSession);
+  els.adminBanner.hidden = !active || !signedIn;
+  els.adminToggle.hidden = !active || !signedIn;
+  els.loginPanel.hidden = !active || signedIn;
   els.adminEntry.hidden = active;
+}
+
+function setLoginStatus(message) {
+  els.loginStatus.textContent = message;
+}
+
+async function syncSession() {
+  if (!supabaseClient) {
+    currentSession = null;
+    setLoginStatus("Supabase Auth 尚未設定。");
+    renderAdminMode();
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.getSession();
+  if (error) {
+    currentSession = null;
+    setLoginStatus(error.message);
+  } else {
+    currentSession = data.session;
+    if (currentSession) setLoginStatus(`已登入：${currentSession.user.email}`);
+  }
+  renderAdminMode();
 }
 
 function formatDate(dateString) {
@@ -511,6 +548,10 @@ function initTheme() {
 }
 
 els.adminToggle.addEventListener("click", () => {
+  if (!currentSession) {
+    setLoginStatus("請先登入管理員帳號。");
+    return;
+  }
   renderEditor();
   els.dialog.showModal();
 });
@@ -532,9 +573,46 @@ els.themeToggle.addEventListener("click", () => {
   localStorage.setItem(THEME_KEY, nextTheme);
 });
 
+els.loginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!supabaseClient) {
+    setLoginStatus("Supabase Auth 尚未載入，請確認網路或 CDN。");
+    return;
+  }
+
+  setLoginStatus("登入中...");
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email: els.loginEmail.value.trim(),
+    password: els.loginPassword.value
+  });
+
+  if (error) {
+    currentSession = null;
+    setLoginStatus(error.message);
+  } else {
+    currentSession = data.session;
+    els.loginPassword.value = "";
+    setLoginStatus(`已登入：${currentSession.user.email}`);
+  }
+  renderAdminMode();
+});
+
+els.logoutButton.addEventListener("click", async () => {
+  if (supabaseClient) await supabaseClient.auth.signOut();
+  currentSession = null;
+  setLoginStatus("已登出。");
+  renderAdminMode();
+});
+
 async function init() {
   initTheme();
-  renderAdminMode();
+  await syncSession();
+  if (supabaseClient) {
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      currentSession = session;
+      renderAdminMode();
+    });
+  }
   render();
   await loadRemoteState();
   render();

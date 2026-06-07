@@ -1,0 +1,49 @@
+{
+  "id": "default",
+  "content": {
+    "title": "個人聲明",
+    "intro": "此頁用於集中發布本人公開聲明、補充說明與必要資料，避免資訊分散造成誤解。",
+    "heroImage": "",
+    "heroCaption": "請替換為本人提供的真實照片、文件截圖或正式封面圖。",
+    "images": [
+      {
+        "url": "",
+        "caption": "可放入本人提供的真實照片或文件截圖"
+      },
+      {
+        "url": "",
+        "caption": "可放入時間線、對話截圖或其他可公開資料"
+      }
+    ],
+    "announcements": [
+      {
+        "title": "關於近期事件的個人聲明",
+        "date": "2026-06-07",
+        "category": "正式聲明",
+        "body": "本人在此就近期相關事項作出說明。後續內容可依實際情況修改，建議保持事實清楚、語氣克制，並保留必要的時間與背景資訊。",
+        "imageUrl": "",
+        "imageCaption": "",
+        "featured": true
+      },
+      {
+        "title": "補充說明",
+        "date": "2026-06-07",
+        "category": "補充",
+        "body": "若日後需要補充證明、時間線或回應外界疑問，可以新增一則聲明，讓讀者依日期查看完整脈絡。",
+        "imageUrl": "",
+        "imageCaption": "",
+        "featured": false
+      },
+      {
+        "title": "聯絡方式",
+        "date": "2026-06-07",
+        "category": "聯絡",
+        "body": "如需聯絡本人，請使用你希望公開的 Email、社群連結或其他正式管道。若不想公開聯絡方式，也可以刪除此則。",
+        "imageUrl": "",
+        "imageCaption": "",
+        "featured": false
+      }
+    ]
+  },
+  "updated_at": "2026-06-07T10:58:00.000Z"
+}

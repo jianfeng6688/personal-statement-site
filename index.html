@@ -81,7 +81,30 @@
             <strong>管理模式</strong>
             <p>你現在可以編輯網站內容，所有保存會同步到 Supabase。</p>
           </div>
-          <button class="secondary-button" id="exitAdmin" type="button">離開管理模式</button>
+          <div class="admin-actions">
+            <button class="secondary-button" id="logoutButton" type="button">登出</button>
+            <button class="secondary-button" id="exitAdmin" type="button">離開管理模式</button>
+          </div>
+        </aside>
+
+        <aside class="admin-login admin-only" id="loginPanel" hidden>
+          <div>
+            <p class="eyebrow">Admin Login</p>
+            <h2>管理員登入</h2>
+            <p>登入後才能編輯與保存網站內容。</p>
+          </div>
+          <form id="loginForm" class="login-form">
+            <label>
+              Email
+              <input id="loginEmail" type="email" autocomplete="email" required />
+            </label>
+            <label>
+              Password
+              <input id="loginPassword" type="password" autocomplete="current-password" required />
+            </label>
+            <button class="primary-button" type="submit">登入</button>
+            <p id="loginStatus" role="status"></p>
+          </form>
         </aside>
 
         <section class="toolbar" aria-label="聲明篩選">
@@ -275,6 +298,7 @@
         supabaseAnonKey: "sb_publishable_Io9ZM-9U4Y416ZKoYK0RJw_v7AI4jX6"
       };
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./app.js"></script>
   </body>
 </html>

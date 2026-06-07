@@ -138,7 +138,8 @@ img {
   background: color-mix(in srgb, var(--surface) 82%, transparent);
 }
 
-.admin-banner {
+.admin-banner,
+.admin-login {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -150,9 +151,27 @@ img {
   background: color-mix(in srgb, var(--gold) 13%, var(--surface));
 }
 
-.admin-banner p {
+.admin-banner p,
+.admin-login p {
   margin: 4px 0 0;
   color: var(--muted);
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.login-form {
+  display: grid;
+  width: min(420px, 100%);
+  gap: 12px;
+}
+
+.login-form p {
+  min-height: 1.4em;
 }
 
 .eyebrow {
@@ -743,6 +762,11 @@ time {
   }
 
   .dialog-footer {
+    display: grid;
+  }
+
+  .admin-banner,
+  .admin-login {
     display: grid;
   }
 }
