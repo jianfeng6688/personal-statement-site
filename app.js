@@ -1,7 +1,7 @@
 const STORAGE_KEY = "personal-statement-site-v2";
 const THEME_KEY = "personal-statement-theme";
 const REMOTE_ROW_ID = "default";
-const ADMIN_HASH = "#hbad-admin-2026";
+const ADMIN_HASH = '#hbad-admin-2026';
 
 const seedState = {
   title: "個人聲明",
@@ -41,7 +41,7 @@ const seedState = {
       title: "聯絡方式",
       date: "2026-06-07",
       category: "聯絡",
-      body: "如需聯絡本人，請使用你希望公開的 Email、社群連結或其他正式管道。若不想公開聯絡方式，也可以刪除此則。",
+      body: "如需聯絡本人，請使用你希望公開的電子郵件、社群連結或其他正式管道。若不想公開聯絡方式，也可以刪除此則。",
       imageUrl: "",
       imageCaption: "",
       featured: false
@@ -69,7 +69,7 @@ const els = {
   statementCount: document.querySelector("#statementCount"),
   imageCount: document.querySelector("#imageCount"),
   adminToggle: document.querySelector("#adminToggle"),
-  adminBanner: document.querySelector("#adminBanner"),
+  adminPanel: document.querySelector("#adminPanel"),
   exitAdmin: document.querySelector("#exitAdmin"),
   loginPanel: document.querySelector("#loginPanel"),
   loginForm: document.querySelector("#loginForm"),
@@ -209,19 +209,37 @@ function setStatus(message) {
 }
 
 function isAdminMode() {
-  return window.location.hash === ADMIN_HASH;
+  const isAdminRoute = window.location.hash === ADMIN_HASH;
+  return isAdminRoute;
 }
 
 function renderAdminMode() {
-  const active = isAdminMode();
+  const isAdminRoute = window.location.hash === ADMIN_HASH;
   const signedIn = Boolean(currentSession);
-  els.adminBanner.hidden = !active || !signedIn;
-  els.adminToggle.hidden = !active || !signedIn;
-  els.loginPanel.hidden = !active || signedIn;
+  document.documentElement.dataset.adminRoute = String(isAdminRoute);
+  document.documentElement.dataset.adminAuthenticated = String(signedIn);
+
+  if (!isAdminRoute) {
+    els.adminPanel.hidden = true;
+    els.adminToggle.hidden = true;
+    els.adminToggle.disabled = true;
+    els.loginPanel.hidden = true;
+    if (els.dialog.open) els.dialog.close();
+    return;
+  }
+
+  els.loginPanel.hidden = signedIn;
+  els.adminPanel.hidden = !signedIn;
+  els.adminToggle.hidden = !signedIn;
+  els.adminToggle.disabled = !signedIn;
 }
 
 function setLoginStatus(message) {
   els.loginStatus.textContent = message;
+}
+
+function publicText(value) {
+  return String(value || "").replaceAll("Email", "電子郵件");
 }
 
 async function syncSession() {
@@ -280,8 +298,8 @@ function sortedAnnouncements() {
 function render() {
   els.brandName.textContent = state.title;
   els.siteTitle.textContent = state.title;
-  els.siteIntro.textContent = state.intro;
-  els.heroCaption.textContent = state.heroCaption || "";
+  els.siteIntro.textContent = publicText(state.intro);
+  els.heroCaption.textContent = publicText(state.heroCaption);
   els.statementCount.textContent = `${state.announcements.length} 則聲明`;
   renderHeroImage();
   renderLastUpdated();
@@ -335,7 +353,7 @@ function renderFeatured() {
   }
 
   els.featuredTitle.textContent = featured.title || "未命名聲明";
-  els.featuredBody.textContent = featured.body || "尚未填寫聲明內容。";
+    els.featuredBody.textContent = publicText(featured.body || "尚未填寫聲明內容。");
   els.featuredDate.textContent = formatDate(featured.date);
   els.featuredCategory.textContent = featured.category || "未分類";
 }
@@ -357,7 +375,7 @@ function renderImages() {
     const node = els.imageTemplate.content.cloneNode(true);
     node.querySelector("img").src = item.url;
     node.querySelector("img").alt = item.caption || "相關圖片";
-    node.querySelector("figcaption").textContent = item.caption || "相關圖片";
+    node.querySelector("figcaption").textContent = publicText(item.caption || "相關圖片");
     els.imageList.append(node);
   });
 }
@@ -377,14 +395,14 @@ function renderAnnouncements() {
     node.querySelector(".category").textContent = item.category || "未分類";
     node.querySelector("time").textContent = formatDate(item.date);
     node.querySelector("h3").textContent = item.title || "未命名聲明";
-    node.querySelector("p").textContent = item.body || "尚未填寫聲明內容。";
+    node.querySelector("p").textContent = publicText(item.body || "尚未填寫聲明內容。");
 
     const imageFigure = node.querySelector(".card-image");
     if (item.imageUrl) {
       imageFigure.hidden = false;
       imageFigure.querySelector("img").src = item.imageUrl;
       imageFigure.querySelector("img").alt = item.imageCaption || item.title || "聲明圖片";
-      imageFigure.querySelector("figcaption").textContent = item.imageCaption || "聲明相關圖片";
+      imageFigure.querySelector("figcaption").textContent = publicText(item.imageCaption || "聲明相關圖片");
     }
 
     els.list.append(node);

@@ -84,5 +84,6 @@ https://你的網站網址/#hbad-admin-2026
 進入管理模式後，頁面頂部會出現「編輯」按鈕。修改內容後會自動寫回 Supabase 的 `public.site_content`。
 
 現在管理入口已接 Supabase Auth。未登入時進入 `#hbad-admin-2026` 會顯示登入頁；登入後才會出現「編輯」按鈕。
+舊入口 `#admin` 不會啟用管理功能，會被當作普通首頁處理。
 
 正式公開前，請在 Supabase SQL Editor 執行 `supabase-auth-rls.sql`，並把 SQL 裡的 `YOUR_ADMIN_EMAIL@example.com` 換成你的管理員登入 Email。這會移除 anon 更新權限，只允許管理員白名單更新網站內容。

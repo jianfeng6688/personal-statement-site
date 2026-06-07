@@ -35,6 +35,17 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
+html:not([data-admin-route="true"]) .admin-only,
+html[data-admin-route="true"]:not([data-admin-authenticated="true"]) #adminPanel,
+html[data-admin-route="true"]:not([data-admin-authenticated="true"]) #adminToggle,
+html[data-admin-route="true"][data-admin-authenticated="true"] #loginPanel {
+  display: none !important;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -133,14 +144,8 @@ img {
   font-weight: 800;
 }
 
-.admin-link {
-  border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--surface) 82%, transparent);
-}
-
 .admin-banner,
 .admin-login {
-  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -149,6 +154,15 @@ img {
   border: 1px solid color-mix(in srgb, var(--gold) 56%, var(--line));
   border-radius: 8px;
   background: color-mix(in srgb, var(--gold) 13%, var(--surface));
+}
+
+html[data-admin-route="true"]:not([data-admin-authenticated="true"]) #loginPanel,
+html[data-admin-route="true"][data-admin-authenticated="true"] #adminPanel {
+  display: flex;
+}
+
+html[data-admin-route="true"][data-admin-authenticated="true"] #adminToggle {
+  display: inline-flex;
 }
 
 .admin-banner p,

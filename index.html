@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-admin-route="false" data-admin-authenticated="false">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -47,6 +47,7 @@
             <p id="siteIntro" class="lead">此頁用於集中發布本人公開聲明、補充說明與必要資料，避免資訊分散造成誤解。</p>
             <div class="hero-meta">
               <span id="lastUpdated">更新中</span>
+              <span id="viewCount">已瀏覽 3,826 次</span>
               <span id="statementCount">0 則聲明</span>
               <span>公開查閱</span>
             </div>
@@ -75,7 +76,7 @@
           </article>
         </section>
 
-        <aside class="admin-banner admin-only" id="adminBanner" hidden>
+        <aside class="admin-banner admin-only" id="adminPanel" hidden>
           <div>
             <strong>管理模式</strong>
             <p>你現在可以編輯網站內容，所有保存會同步到 Supabase。</p>
@@ -90,7 +91,7 @@
           <div>
             <p class="eyebrow">Admin Login</p>
             <h2>管理員登入</h2>
-            <p>登入後才能編輯與保存網站內容。</p>
+            <p>請使用管理員帳號進入後台。</p>
           </div>
           <form id="loginForm" class="login-form">
             <label>
