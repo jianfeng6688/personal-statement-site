@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>個人聲明</title>
+    <meta name="description" content="個人公開聲明與補充說明頁面。" />
+    <script>
+      window.__runtimeErrors = [];
+      window.__recordRuntimeError = function (message) {
+        window.__runtimeErrors.push(String(message));
+        document.documentElement.dataset.consoleErrors = String(window.__runtimeErrors.length);
+      };
+      window.addEventListener("error", function (event) {
+        window.__recordRuntimeError(event.message || "Unknown runtime error");
+      });
+      window.addEventListener("unhandledrejection", function (event) {
+        var reason = event.reason && (event.reason.message || event.reason);
+        window.__recordRuntimeError(reason || "Unhandled promise rejection");
+      });
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="site-header">
+        <a class="brand" href="#top" aria-label="回到頁首">
+          <span class="brand-mark">聲</span>
+          <span id="brandName">個人聲明</span>
+        </a>
+        <nav class="nav-actions" aria-label="網站操作">
+          <a href="#statements">聲明</a>
+          <a href="#evidence">圖片</a>
+          <button class="icon-button" id="themeToggle" type="button" aria-label="切換深淺色">◐</button>
+          <a class="admin-link" id="adminEntry" href="#admin">管理</a>
+          <button class="primary-button admin-only" id="adminToggle" type="button" hidden>編輯</button>
+        </nav>
+      </header>
+
+      <main id="top">
+        <section class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">Official Personal Statement</p>
+            <h1 id="siteTitle">個人聲明</h1>
+            <p id="siteIntro" class="lead">此頁用於集中發布本人公開聲明、補充說明與必要資料，避免資訊分散造成誤解。</p>
+            <div class="hero-meta">
+              <span id="lastUpdated">更新中</span>
+              <span id="statementCount">0 則聲明</span>
+              <span>公開查閱</span>
+            </div>
+          </div>
+          <figure class="hero-visual">
+            <img id="heroImage" alt="個人聲明封面圖片" />
+            <figcaption id="heroCaption">請替換為本人提供的真實照片、文件截圖或正式封面圖。</figcaption>
+          </figure>
+        </section>
+
+        <section class="summary-strip" aria-label="頁面摘要">
+          <article>
+            <span>01</span>
+            <strong>集中發布</strong>
+            <p>所有聲明依日期整理，方便查閱完整脈絡。</p>
+          </article>
+          <article>
+            <span>02</span>
+            <strong>補充資料</strong>
+            <p>圖片區可放置真實照片、截圖或文件頁面。</p>
+          </article>
+          <article>
+            <span>03</span>
+            <strong>跨裝置瀏覽</strong>
+            <p>部署上線後，手機與電腦都能透過網址查看。</p>
+          </article>
+        </section>
+
+        <aside class="admin-banner admin-only" id="adminBanner" hidden>
+          <div>
+            <strong>管理模式</strong>
+            <p>你現在可以編輯網站內容，所有保存會同步到 Supabase。</p>
+          </div>
+          <button class="secondary-button" id="exitAdmin" type="button">離開管理模式</button>
+        </aside>
+
+        <section class="toolbar" aria-label="聲明篩選">
+          <label class="search-box">
+            <span>搜尋聲明</span>
+            <input id="searchInput" type="search" placeholder="輸入關鍵字、主題或日期" />
+          </label>
+          <div class="filters" id="categoryFilters"></div>
+        </section>
+
+        <section class="feature-grid">
+          <aside class="featured-card">
+            <p class="panel-label">置頂聲明</p>
+            <h2 id="featuredTitle">載入中</h2>
+            <p id="featuredBody">請稍候。</p>
+            <div class="meta-row">
+              <span id="featuredDate"></span>
+              <span id="featuredCategory"></span>
+            </div>
+          </aside>
+
+          <section id="evidence" class="image-board" aria-label="相關圖片">
+            <div class="section-title">
+              <div>
+                <p class="eyebrow">Image Record</p>
+                <h2>相關圖片</h2>
+              </div>
+              <span id="imageCount">0 張</span>
+            </div>
+            <div id="imageList" class="image-list"></div>
+          </section>
+        </section>
+
+        <section id="statements" class="statements" aria-label="聲明列表">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Statement Timeline</p>
+              <h2>公開聲明</h2>
+            </div>
+            <span id="resultCount">0 則</span>
+          </div>
+          <div id="announcementList" class="statement-list"></div>
+          <p id="emptyState" class="empty-state" hidden>目前沒有符合條件的聲明。</p>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="editorDialog" class="editor-dialog">
+      <form method="dialog" class="editor">
+        <div class="editor-header">
+          <div>
+            <p class="eyebrow">Content Editor</p>
+            <h2>修改聲明內容</h2>
+          </div>
+          <button class="icon-button" value="cancel" type="submit" aria-label="關閉編輯器">×</button>
+        </div>
+
+        <section class="editor-section">
+          <label>
+            網站標題
+            <input id="titleEditor" type="text" maxlength="40" />
+          </label>
+          <label>
+            簡介文字
+            <textarea id="introEditor" rows="3" maxlength="220"></textarea>
+          </label>
+          <div class="editor-grid">
+            <label>
+              封面圖片網址
+              <input id="heroImageEditor" type="url" placeholder="https://..." />
+            </label>
+            <label>
+              封面圖片說明
+              <input id="heroCaptionEditor" type="text" maxlength="90" />
+            </label>
+          </div>
+        </section>
+
+        <div class="editor-actions">
+          <button class="primary-button" id="addAnnouncement" type="button">新增聲明</button>
+          <button class="secondary-button" id="addImage" type="button">新增圖片</button>
+          <button class="secondary-button" id="exportData" type="button">匯出內容</button>
+          <label class="secondary-button file-action">
+            匯入內容
+            <input id="importData" type="file" accept="application/json" />
+          </label>
+          <button class="danger-button" id="resetData" type="button">還原範例</button>
+        </div>
+
+        <section class="editor-section">
+          <h3>圖片資料</h3>
+          <div id="imageEditorList" class="editor-list compact"></div>
+        </section>
+
+        <section class="editor-section">
+          <h3>聲明資料</h3>
+          <div id="editorList" class="editor-list"></div>
+        </section>
+
+        <div class="dialog-footer">
+          <p id="saveStatus" role="status">線上資料庫未設定時，會先儲存在此瀏覽器。</p>
+          <button class="primary-button" value="default" type="submit">完成</button>
+        </div>
+      </form>
+    </dialog>
+
+    <template id="announcementTemplate">
+      <article class="statement-card">
+        <div class="card-top">
+          <span class="category"></span>
+          <time></time>
+        </div>
+        <h3></h3>
+        <p></p>
+        <figure class="card-image" hidden>
+          <img alt="" />
+          <figcaption></figcaption>
+        </figure>
+      </article>
+    </template>
+
+    <template id="imageTemplate">
+      <figure class="evidence-card">
+        <img alt="" />
+        <figcaption></figcaption>
+      </figure>
+    </template>
+
+    <template id="editorTemplate">
+      <article class="edit-card">
+        <div class="edit-card-header">
+          <strong class="edit-index"></strong>
+          <button class="danger-button remove-button" type="button">刪除</button>
+        </div>
+        <label>
+          標題
+          <input class="edit-title" type="text" maxlength="80" />
+        </label>
+        <div class="editor-grid">
+          <label>
+            日期
+            <input class="edit-date" type="date" />
+          </label>
+          <label>
+            主題
+            <input class="edit-category" type="text" maxlength="20" />
+          </label>
+        </div>
+        <label>
+          內容
+          <textarea class="edit-body" rows="5" maxlength="900"></textarea>
+        </label>
+        <div class="editor-grid">
+          <label>
+            圖片網址
+            <input class="edit-image" type="url" placeholder="https://..." />
+          </label>
+          <label>
+            圖片說明
+            <input class="edit-image-caption" type="text" maxlength="90" />
+          </label>
+        </div>
+        <label class="checkbox-row">
+          <input class="edit-featured" type="checkbox" />
+          設為置頂聲明
+        </label>
+      </article>
+    </template>
+
+    <template id="imageEditorTemplate">
+      <article class="edit-card">
+        <div class="edit-card-header">
+          <strong class="edit-index"></strong>
+          <button class="danger-button remove-button" type="button">刪除</button>
+        </div>
+        <label>
+          圖片網址
+          <input class="edit-url" type="url" placeholder="https://..." />
+        </label>
+        <label>
+          圖片說明
+          <input class="edit-caption" type="text" maxlength="100" />
+        </label>
+      </article>
+    </template>
+
+    <script src="./config.js"></script>
+    <script>
+      window.SITE_CONFIG = window.SITE_CONFIG || {
+        supabaseUrl: "https://bwmucosgyetlnioimada.supabase.co",
+        supabaseAnonKey: "sb_publishable_Io9ZM-9U4Y416ZKoYK0RJw_v7AI4jX6"
+      };
+    </script>
+    <script src="./app.js"></script>
+  </body>
+</html>
