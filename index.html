@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <div class="page">
@@ -58,22 +58,7 @@
           </figure>
         </section>
 
-        <section class="summary-strip" aria-label="頁面摘要">
-          <article>
-            <span>01</span>
-            <strong>公開聲明</strong>
-            <p>集中整理正式說明，依時間與主題保留完整脈絡。</p>
-          </article>
-          <article>
-            <span>02</span>
-            <strong>感情說明</strong>
-            <p>以清楚、克制的方式補充關係背景與必要事實。</p>
-          </article>
-          <article>
-            <span>03</span>
-            <strong>身份核實</strong>
-            <p>相關圖片與資料可用於佐證身分、時間與事件脈絡。</p>
-          </article>
+        <section id="navCardList" class="summary-strip" aria-label="頁面摘要">
         </section>
 
         <aside class="admin-banner admin-only" id="adminPanel" hidden>
@@ -187,6 +172,11 @@
           </div>
         </section>
 
+        <section class="editor-section">
+          <h3>導覽卡片</h3>
+          <div id="navCardEditorList" class="editor-list compact"></div>
+        </section>
+
         <div class="editor-actions">
           <button class="primary-button" id="addAnnouncement" type="button">新增聲明</button>
           <button class="secondary-button" id="addImage" type="button">新增圖片</button>
@@ -195,7 +185,6 @@
             匯入內容
             <input id="importData" type="file" accept="application/json" />
           </label>
-          <button class="danger-button" id="resetData" type="button">還原範例</button>
         </div>
 
         <section class="editor-section">
@@ -235,6 +224,14 @@
         <img alt="" />
         <figcaption></figcaption>
       </figure>
+    </template>
+
+    <template id="navCardTemplate">
+      <article class="summary-card">
+        <span class="summary-number"></span>
+        <strong></strong>
+        <p></p>
+      </article>
     </template>
 
     <template id="editorTemplate">
@@ -278,6 +275,28 @@
       </article>
     </template>
 
+    <template id="navCardEditorTemplate">
+      <article class="edit-card nav-edit-card">
+        <div class="edit-card-header">
+          <strong class="edit-index"></strong>
+        </div>
+        <div class="editor-grid two-column">
+          <label>
+            編號
+            <input class="edit-nav-number" type="text" maxlength="4" />
+          </label>
+          <label>
+            標題
+            <input class="edit-nav-title" type="text" maxlength="24" />
+          </label>
+        </div>
+        <label>
+          描述
+          <textarea class="edit-nav-description" rows="4" maxlength="260"></textarea>
+        </label>
+      </article>
+    </template>
+
     <template id="imageEditorTemplate">
       <article class="edit-card">
         <div class="edit-card-header">
@@ -295,7 +314,7 @@
       </article>
     </template>
 
-    <script src="/config.js"></script>
+    <script src="./config.js"></script>
     <script>
       window.SITE_CONFIG = window.SITE_CONFIG || {
         supabaseUrl: "https://bwmucosgyetlnioimada.supabase.co",
@@ -303,6 +322,6 @@
       };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="/app.js"></script>
+    <script src="./app.js"></script>
   </body>
 </html>

@@ -6,10 +6,28 @@ const STORAGE_BUCKET = "site-images";
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const seedState = {
-  title: "個人聲明",
-  intro: "此頁用於集中發布本人公開聲明、補充說明與必要資料，避免資訊分散造成誤解。",
+  title: "劉雅娜女士公開聲明",
+  intro: "針對近期 Facebook／臉書平台不實言論、身份冒充及相關誤導資訊，集中發布正式說明。",
   heroImage: "",
-  heroCaption: "請替換為本人提供的真實照片、文件截圖或正式封面圖。",
+  heroCaption: "正式公開聲明與身份核實資料集中存放。",
+  viewCount: 3826,
+  navCards: [
+    {
+      number: "01",
+      title: "公開聲明",
+      description: "集中說明 Facebook／臉書平台上針對劉雅娜女士的不實言論、片面截圖與惡意詆毀，避免外界被錯誤資訊誤導。"
+    },
+    {
+      number: "02",
+      title: "感情說明",
+      description: "補充說明劉雅娜女士與粘連全男士之間的穩定感情關係，並表明不接受第三方介入、干擾或惡意挑撥。"
+    },
+    {
+      number: "03",
+      title: "身份核實",
+      description: "確認劉雅娜女士本人可使用的正式聯絡方式，提醒外界謹慎辨別真偽，防止他人冒充。"
+    }
+  ],
   images: [
     {
       url: "",
@@ -68,7 +86,9 @@ const els = {
   heroImage: document.querySelector("#heroImage"),
   heroCaption: document.querySelector("#heroCaption"),
   lastUpdated: document.querySelector("#lastUpdated"),
+  viewCount: document.querySelector("#viewCount"),
   statementCount: document.querySelector("#statementCount"),
+  navCardList: document.querySelector("#navCardList"),
   imageCount: document.querySelector("#imageCount"),
   adminToggle: document.querySelector("#adminToggle"),
   adminPanel: document.querySelector("#adminPanel"),
@@ -96,6 +116,7 @@ const els = {
   introEditor: document.querySelector("#introEditor"),
   heroImageEditor: document.querySelector("#heroImageEditor"),
   heroCaptionEditor: document.querySelector("#heroCaptionEditor"),
+  navCardEditorList: document.querySelector("#navCardEditorList"),
   addAnnouncement: document.querySelector("#addAnnouncement"),
   addImage: document.querySelector("#addImage"),
   exportData: document.querySelector("#exportData"),
@@ -105,8 +126,10 @@ const els = {
   imageEditorList: document.querySelector("#imageEditorList"),
   saveStatus: document.querySelector("#saveStatus"),
   announcementTemplate: document.querySelector("#announcementTemplate"),
+  navCardTemplate: document.querySelector("#navCardTemplate"),
   imageTemplate: document.querySelector("#imageTemplate"),
   editorTemplate: document.querySelector("#editorTemplate"),
+  navCardEditorTemplate: document.querySelector("#navCardEditorTemplate"),
   imageEditorTemplate: document.querySelector("#imageEditorTemplate")
 };
 
@@ -122,14 +145,29 @@ function loadLocalState() {
 }
 
 function normalizeState(raw) {
+  const viewCount = Number(raw.viewCount);
   return {
     title: raw.title || seedState.title,
     intro: raw.intro || seedState.intro,
     heroImage: raw.heroImage || "",
     heroCaption: raw.heroCaption || seedState.heroCaption,
+    viewCount: Number.isFinite(viewCount) ? viewCount : seedState.viewCount,
+    navCards: normalizeNavCards(raw.navCards),
     images: Array.isArray(raw.images) ? raw.images : seedState.images,
     announcements: Array.isArray(raw.announcements) ? raw.announcements : seedState.announcements
   };
+}
+
+function normalizeNavCards(cards) {
+  if (!Array.isArray(cards) || !cards.length) return structuredClone(seedState.navCards);
+  return seedState.navCards.map((fallback, index) => {
+    const item = cards[index] || {};
+    return {
+      number: item.number || fallback.number,
+      title: item.title || fallback.title,
+      description: item.description || fallback.description
+    };
+  });
 }
 
 function isRemoteConfigured() {
@@ -169,10 +207,32 @@ async function loadRemoteState() {
   }
 }
 
+async function fetchRemoteViewCount() {
+  if (!isRemoteConfigured()) return null;
+
+  try {
+    const endpoint = `${siteConfig.supabaseUrl}/rest/v1/site_content?id=eq.${REMOTE_ROW_ID}&select=content&limit=1`;
+    const response = await fetch(endpoint, { headers: remoteHeaders() });
+    if (!response.ok) return null;
+    const rows = await response.json();
+    const viewCount = Number(rows[0]?.content?.viewCount);
+    return Number.isFinite(viewCount) ? viewCount : null;
+  } catch {
+    return null;
+  }
+}
+
 async function saveRemoteState() {
   if (!isRemoteConfigured()) return;
   if (!currentSession?.access_token) {
     throw new Error("請先登入管理員帳號");
+  }
+
+  const remoteViewCount = await fetchRemoteViewCount();
+  const content = { ...state };
+  if (Number.isFinite(remoteViewCount)) {
+    content.viewCount = Math.max(Number(state.viewCount) || 0, remoteViewCount);
+    state.viewCount = content.viewCount;
   }
 
   const endpoint = `${siteConfig.supabaseUrl}/rest/v1/site_content?on_conflict=id`;
@@ -184,12 +244,36 @@ async function saveRemoteState() {
     },
     body: JSON.stringify({
       id: REMOTE_ROW_ID,
-      content: state,
+      content,
       updated_at: new Date().toISOString()
     })
   });
 
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
+}
+
+async function incrementViewCount() {
+  if (!isRemoteConfigured()) return;
+
+  try {
+    const endpoint = `${siteConfig.supabaseUrl}/rest/v1/rpc/increment_site_view_count`;
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: remoteHeaders(),
+      body: JSON.stringify({ row_id: REMOTE_ROW_ID })
+    });
+    if (!response.ok) return;
+
+    const value = await response.json();
+    const nextCount = Array.isArray(value) ? Number(value[0]) : Number(value);
+    if (Number.isFinite(nextCount)) {
+      state.viewCount = nextCount;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      renderViewCount();
+    }
+  } catch {
+    renderViewCount();
+  }
 }
 
 function saveState() {
@@ -291,6 +375,15 @@ function formatTime(date) {
   }).format(date);
 }
 
+function formatNumber(value) {
+  return new Intl.NumberFormat("en-US").format(Number(value) || 0);
+}
+
+function displayTitle() {
+  const title = state.title || seedState.title;
+  return title === "劉雅娜女士個人聲明" ? "劉雅娜女士公開聲明" : title;
+}
+
 function sortedAnnouncements() {
   return [...state.announcements].sort((a, b) => {
     if (a.featured !== b.featured) return a.featured ? -1 : 1;
@@ -299,17 +392,34 @@ function sortedAnnouncements() {
 }
 
 function render() {
-  els.brandName.textContent = state.title;
-  els.siteTitle.textContent = state.title;
+  els.brandName.textContent = displayTitle();
+  els.siteTitle.textContent = displayTitle();
   els.siteIntro.textContent = publicText(state.intro);
   els.heroCaption.textContent = publicText(state.heroCaption);
   els.statementCount.textContent = `${state.announcements.length} 則聲明`;
+  renderViewCount();
+  renderNavCards();
   renderHeroImage();
   renderLastUpdated();
   renderFilters();
   renderFeatured();
   renderImages();
   renderAnnouncements();
+}
+
+function renderViewCount() {
+  els.viewCount.textContent = `已瀏覽 ${formatNumber(state.viewCount)} 次`;
+}
+
+function renderNavCards() {
+  els.navCardList.innerHTML = "";
+  state.navCards.forEach((item) => {
+    const node = els.navCardTemplate.content.cloneNode(true);
+    node.querySelector(".summary-number").textContent = item.number;
+    node.querySelector("strong").textContent = item.title;
+    node.querySelector("p").textContent = publicText(item.description);
+    els.navCardList.append(node);
+  });
 }
 
 function renderHeroImage() {
@@ -420,8 +530,33 @@ function renderEditor() {
   els.introEditor.value = state.intro;
   els.heroImageEditor.value = state.heroImage;
   els.heroCaptionEditor.value = state.heroCaption;
+  renderNavCardEditor();
   renderImageEditor();
   renderStatementEditor();
+}
+
+function renderNavCardEditor() {
+  els.navCardEditorList.innerHTML = "";
+
+  state.navCards.forEach((item, index) => {
+    const node = els.navCardEditorTemplate.content.cloneNode(true);
+    const card = node.querySelector(".edit-card");
+    node.querySelector(".edit-index").textContent = `導覽卡片 ${index + 1}`;
+    node.querySelector(".edit-nav-number").value = item.number || "";
+    node.querySelector(".edit-nav-title").value = item.title || "";
+    node.querySelector(".edit-nav-description").value = item.description || "";
+
+    card.addEventListener("input", (event) => {
+      const target = event.target;
+      if (target.classList.contains("edit-nav-number")) item.number = target.value;
+      if (target.classList.contains("edit-nav-title")) item.title = target.value;
+      if (target.classList.contains("edit-nav-description")) item.description = target.value;
+      saveState();
+      render();
+    });
+
+    els.navCardEditorList.append(node);
+  });
 }
 
 function renderImageEditor() {
@@ -650,7 +785,7 @@ els.imageUploadInput.addEventListener("change", async (event) => {
 });
 els.exportData.addEventListener("click", exportContent);
 els.importData.addEventListener("change", (event) => importContent(event.target.files[0]));
-els.resetData.addEventListener("click", resetContent);
+els.resetData?.addEventListener("click", resetContent);
 els.searchInput.addEventListener("input", renderAnnouncements);
 
 els.themeToggle.addEventListener("click", () => {
@@ -702,6 +837,7 @@ async function init() {
   render();
   await loadRemoteState();
   render();
+  if (!isAdminMode()) await incrementViewCount();
 }
 
 window.addEventListener("hashchange", renderAdminMode);
