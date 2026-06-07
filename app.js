@@ -2,6 +2,8 @@ const STORAGE_KEY = "personal-statement-site-v2";
 const THEME_KEY = "personal-statement-theme";
 const REMOTE_ROW_ID = "default";
 const ADMIN_HASH = '#hbad-admin-2026';
+const STORAGE_BUCKET = "site-images";
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const seedState = {
   title: "個人聲明",
@@ -76,6 +78,7 @@ const els = {
   loginEmail: document.querySelector("#loginEmail"),
   loginPassword: document.querySelector("#loginPassword"),
   loginStatus: document.querySelector("#loginStatus"),
+  imageUploadInput: document.querySelector("#imageUploadInput"),
   logoutButton: document.querySelector("#logoutButton"),
   themeToggle: document.querySelector("#themeToggle"),
   searchInput: document.querySelector("#searchInput"),
@@ -514,6 +517,63 @@ function addImage() {
   renderEditor();
 }
 
+function extensionFor(file) {
+  const fromName = file.name.split(".").pop()?.toLowerCase();
+  if (fromName === "jpg" || fromName === "jpeg" || fromName === "png" || fromName === "webp") {
+    return fromName === "jpeg" ? "jpg" : fromName;
+  }
+  if (file.type === "image/png") return "png";
+  if (file.type === "image/webp") return "webp";
+  return "jpg";
+}
+
+async function uploadImages(files) {
+  if (!currentSession) {
+    setStatus("請先登入管理員帳號。");
+    return;
+  }
+  if (!supabaseClient) {
+    setStatus("Supabase 尚未載入。");
+    return;
+  }
+
+  const validFiles = [...files].filter((file) => ALLOWED_IMAGE_TYPES.includes(file.type));
+  if (!validFiles.length) {
+    setStatus("請選擇 jpg、jpeg、png 或 webp 圖片。");
+    return;
+  }
+
+  setStatus(`正在上傳 ${validFiles.length} 張圖片...`);
+  const uploaded = [];
+
+  for (const file of validFiles) {
+    const ext = extensionFor(file);
+    const random = Math.random().toString(36).slice(2, 10);
+    const path = `${Date.now()}-${random}.${ext}`;
+    const { error } = await supabaseClient.storage
+      .from(STORAGE_BUCKET)
+      .upload(path, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false
+      });
+
+    if (error) throw new Error(error.message);
+
+    const { data } = supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+    uploaded.push({
+      url: data.publicUrl,
+      caption: file.name.replace(/\.[^.]+$/, "") || "上傳圖片"
+    });
+  }
+
+  state.images = [...uploaded, ...state.images];
+  saveState();
+  render();
+  renderEditor();
+  setStatus(`已上傳 ${uploaded.length} 張圖片，正在同步內容...`);
+}
+
 function exportContent() {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -579,6 +639,15 @@ els.heroImageEditor.addEventListener("input", updateSiteBasics);
 els.heroCaptionEditor.addEventListener("input", updateSiteBasics);
 els.addAnnouncement.addEventListener("click", addAnnouncement);
 els.addImage.addEventListener("click", addImage);
+els.imageUploadInput.addEventListener("change", async (event) => {
+  try {
+    await uploadImages(event.target.files);
+  } catch (error) {
+    setStatus(`圖片上傳失敗：${error.message}`);
+  } finally {
+    event.target.value = "";
+  }
+});
 els.exportData.addEventListener("click", exportContent);
 els.importData.addEventListener("change", (event) => importContent(event.target.files[0]));
 els.resetData.addEventListener("click", resetContent);

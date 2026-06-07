@@ -647,14 +647,16 @@ time {
   gap: 10px;
 }
 
-.file-action {
+.file-action,
+.upload-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 42px;
 }
 
-.file-action input {
+.file-action input,
+.upload-action input {
   position: absolute;
   inline-size: 1px;
   block-size: 1px;
