@@ -533,28 +533,33 @@ textarea:focus {
 .statements {
   margin-top: 20px;
   padding: 24px;
+  max-width: 1200px;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .statement-list {
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 
 .statement-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(180px, 260px);
-  gap: 18px;
-  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 1160px;
+  padding: 26px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
 }
 
 .card-top {
-  grid-column: 1 / -1;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 2px;
+  margin-bottom: 0;
 }
 
 .statement-card .category {
@@ -569,20 +574,22 @@ time {
 }
 
 .statement-card h3 {
-  margin-bottom: 10px;
+  width: 100%;
+  margin-bottom: 0;
   font-size: 1.28rem;
 }
 
 .statement-card p,
 .empty-state {
+  width: 100%;
+  max-width: none;
   margin-bottom: 0;
   color: var(--muted);
   line-height: 1.85;
 }
 
 .card-image {
-  grid-row: 2 / span 2;
-  grid-column: 2;
+  width: 100%;
   overflow: hidden;
   margin: 0;
   border: 1px solid var(--line);
@@ -592,7 +599,7 @@ time {
 
 .card-image img {
   width: 100%;
-  height: 190px;
+  max-height: 460px;
   object-fit: cover;
 }
 
@@ -604,7 +611,7 @@ time {
 }
 
 .editor-dialog {
-  width: min(980px, calc(100% - 24px));
+  width: min(1180px, calc(100% - 24px));
   max-height: min(900px, calc(100% - 24px));
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -622,6 +629,7 @@ time {
   display: grid;
   gap: 18px;
   padding: 22px;
+  width: 100%;
 }
 
 .editor-header {
@@ -678,7 +686,9 @@ time {
 
 .edit-card {
   display: grid;
+  grid-template-columns: 1fr;
   gap: 12px;
+  width: 100%;
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -692,8 +702,20 @@ time {
 
 .editor-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 12px;
+}
+
+.edit-card input,
+.edit-card textarea,
+.editor-section input,
+.editor-section textarea {
+  width: 100%;
+}
+
+.edit-card textarea,
+.editor-section textarea {
+  min-height: 180px;
 }
 
 .checkbox-row {
@@ -759,7 +781,6 @@ time {
 
   .summary-strip,
   .toolbar,
-  .statement-card,
   .editor-grid {
     grid-template-columns: 1fr;
   }
@@ -770,11 +791,6 @@ time {
 
   .image-list {
     grid-template-columns: 1fr;
-  }
-
-  .card-image {
-    grid-row: auto;
-    grid-column: auto;
   }
 
   .dialog-footer {
