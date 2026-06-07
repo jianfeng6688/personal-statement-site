@@ -1,6 +1,7 @@
 const STORAGE_KEY = "personal-statement-site-v2";
 const THEME_KEY = "personal-statement-theme";
 const REMOTE_ROW_ID = "default";
+const ADMIN_HASH = "#hbad-admin-2026";
 
 const seedState = {
   title: "個人聲明",
@@ -68,7 +69,6 @@ const els = {
   statementCount: document.querySelector("#statementCount"),
   imageCount: document.querySelector("#imageCount"),
   adminToggle: document.querySelector("#adminToggle"),
-  adminEntry: document.querySelector("#adminEntry"),
   adminBanner: document.querySelector("#adminBanner"),
   exitAdmin: document.querySelector("#exitAdmin"),
   loginPanel: document.querySelector("#loginPanel"),
@@ -209,7 +209,7 @@ function setStatus(message) {
 }
 
 function isAdminMode() {
-  return window.location.hash === "#admin";
+  return window.location.hash === ADMIN_HASH;
 }
 
 function renderAdminMode() {
@@ -218,7 +218,6 @@ function renderAdminMode() {
   els.adminBanner.hidden = !active || !signedIn;
   els.adminToggle.hidden = !active || !signedIn;
   els.loginPanel.hidden = !active || signedIn;
-  els.adminEntry.hidden = active;
 }
 
 function setLoginStatus(message) {
